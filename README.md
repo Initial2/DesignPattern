@@ -299,7 +299,7 @@ C这个类也相同。C类所依赖的D这个类，他也是接口interface1的�
 
 很显然，A和C这两个类并没有用到接口中的所有方法。但是因为接口中有这5个方法，所以B和D实现类就必须实现所有方法。
 
-这样就违背了接口隔离原则，B和D被迫实现了根本没有必要实现得方法。
+接口 Interface1对于类A和类C来说都不是最小接口，这样就违背了接口隔离原则，B和D被迫实现了根本没有必要实现得方法。
 
 
 
@@ -395,4 +395,255 @@ public class InterfaceTest {
 ```
 
 
+
+
+
+# 依赖倒转原则(Dependence Inversion Principle)
+
+**基本介绍：**
+
+- 高层模块不应该依赖低层模块，二者都应该依赖其抽象。
+- 抽象不应该依赖细节，细节应该依赖抽象
+  - <font color='red'>接口(抽象类)不应该依赖它的实现类，它的实现类应该依赖接口(抽象类)</font>
+- 依赖倒转(倒置)的中心思想是面向接口编
+
+**在java中，<font color='red'>抽象 指的是接口或抽象类</font>，<font color='red'>细节就是具体的实现类</font>**
+
+​	![img](README.assets/Dependency_inversion.png)
+
+**举例说明：**
+
+- 假如有一个Person类，他有接收消息的功能。
+
+  <font color='green'>方式1：</font>
+
+  ```java
+  
+  class Email {
+      public String getMessage(){
+          return "这是一条邮件消息";
+      };
+  }
+  
+  public class Person1 {   
+      public void receiver(Email email){
+          System.out.println(email.getMessage());
+      }
+      
+  }
+  
+  class Person1Test{
+      @Test
+      public void test1(){
+          Person1 person1 = new Person1();
+          person1.receiver(new Email());
+      }
+  }
+  ```
+
+  这种方法比较简单，能够最先想到。  但是他有一些缺点。  如果我们获取的对象是 微信，短信等等，则需要新增类，同时Person1也要增加相应的接收方法
+
+
+
+​	<font color='green'>方法2：</font>
+
+解决思路：引入一个抽象的接口IReceiver, 表示接收者, 让Person类与接口IReceiver发生依赖
+
+因为Email, WeiXin 等等属于接收的范围，他们各自实现IReceiver 接口就ok, 这样我们就符合依赖倒转原则
+
+```java
+interface IReceiver{
+    String getMessage();
+}
+
+class Email1 implements IReceiver{   
+    @Override
+    public String getMessage() {
+        return "这是一条邮件信息";
+    }
+}
+
+class WeiChat implements IReceiver{
+    @Override
+    public String getMessage() {
+        return "这是一条微信信息";
+    }
+}
+
+
+public class Person2 {   
+    //这里我们是对接口的依赖
+    public void getMessage(IReceiver iReceiver){
+        System.out.println(iReceiver.getMessage());
+    }    
+}
+
+class Person2Test{
+    @Test
+    public void test(){
+        Person2 person2 = new Person2();
+        person2.getMessage(new Email1());
+        person2.getMessage(new WeiChat());
+    }
+}
+```
+
+此方法，当我们想要添加新的发送消息工具时，根本不需要修改Person类。 只需要添加IReceiver接口的实现类即可。 
+
+然后将实现类的对象作为参数传递给Person类`getMessage()`方法即可。 
+
+
+
+### 依赖关系传递的三种方式
+
+1. **接口传递** 
+
+2. **构造方法传递** 
+
+3. **setter方式传递**
+
+   
+
+**接口传递：**
+
+```java
+//方式1： 接口传递
+interface TV{
+    void play();
+}
+
+interface OpenAndClose{
+    void opened(TV tv);
+}
+
+class Open implements OpenAndClose{
+    //通过在接口中给我传入一个接口，来实现对接口的依赖。 
+    @Override
+    public void opened(TV tv) {
+       tv.play();
+    }
+}
+
+
+class Haier implements TV{
+    //海尔电视实现了TV接口。 所以它有打开方法
+    @Override
+    public void play() {
+        System.out.println("海尔电视打开");
+    }
+}
+
+public class DependencyPass {
+    @Test
+    public void testDependency(){
+        Haier haier = new Haier();
+        Open open = new Open();
+        open.opened(haier);
+    }
+
+}
+```
+
+
+
+**构造方法传递：**
+
+```java
+interface TV2{
+    void play();
+}
+
+interface OpenAndClose2{
+    void open();
+}
+
+class Open2 implements OpenAndClose2{
+    TV2 tv;
+    //通过构造方法来传入一个接口，实现对接口的依赖
+    public Open2(TV2 tv2){
+        this.tv = tv2;
+    }
+    
+    @Override
+    public void open() {
+        this.tv.play();
+    }
+    
+}
+
+class SkyWorth implements TV2{
+    @Override
+    public void play() {
+        System.out.println("创维电视打开");
+    }
+}
+
+public class DependencyPass2 {
+    @Test
+    public void test(){
+        SkyWorth skyWorth = new SkyWorth();
+        Open2 open2 = new Open2(skyWorth);
+        open2.open();
+    }
+}
+
+```
+
+ 
+
+**setter方式传递：**
+
+ 与构造器传递方式类似，通过setter方法。
+
+```java 
+interface TV3{
+    void play();
+}
+
+interface OpenAndClose3{
+    void open();
+}
+
+class Open3 implements OpenAndClose3{
+    TV3 tv;
+    
+    //与第二种方式相比，把构造器换成了setter方法。 
+    public void setTv(TV3  tv3){
+        this.tv = tv3;
+    }
+    
+    @Override
+    public void open() {
+        this.tv.play();
+    }
+    
+}
+
+class XiaoMI implements TV3{
+    @Override
+    public void play() {
+        System.out.println("小米电视打开");
+    }
+}
+
+public class DependencyPass3 {
+    @Test
+    public  void  testing(){
+        XiaoMI xiaoMI = new XiaoMI();
+        Open3 open3 = new Open3();
+        open3.setTv(xiaoMI);
+        open3.open();
+    }
+}
+```
+
+
+
+### 依赖倒转原则的注意事项和细节
+
+- 低层模块尽量都要有抽象类或接口，或者两者都有，程序稳定性更好. 
+  - 如果A类是一个子类，它的上一级最好有接口或者抽象类。 不要孤零零的放置一个类。 
+- 变量的声明类型尽量是抽象类或接口, 这样我们的变量引用和实际对象间，就存在 一个缓冲层，利于程序扩展和优化 
+  - 当我们想要添加新的功能时，不需要直接去修改对应的类，只需要提供新的接口(抽象类)得实现类作为参数传递给他即可。
+- 继承时遵循里氏替换原则
 
