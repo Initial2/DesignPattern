@@ -647,3 +647,147 @@ public class DependencyPass3 {
   - 当我们想要添加新的功能时，不需要直接去修改对应的类，只需要提供新的接口(抽象类)得实现类作为参数传递给他即可。
 - 继承时遵循里氏替换原则
 
+
+
+
+
+
+
+# 里氏替换原则(Liskov Substitution Principle)
+
+**OO中的继承性的思考和说明：**
+
+-  继承包含这样一层含义：父类中凡是已经实现好的方法，实际上是在设定规范和契
+  约，虽然它不强制要求所有的子类必须遵循这些契约，但是如果子类对这些已经实
+  现的方法任意修改，就会对整个继承体系造成破坏。
+- 继承在给程序设计带来便利的同时，也带来了弊端。如果一个类被其他的类所继承，
+  则当这个类需要修改时，必须考虑到所有的子类，并且父类修改后，所有涉及到子
+  类的功能都有可能产生故障
+
+**基本介绍：**
+
+- 里氏替换原则(Liskov Substitution Principle)在1988年，由麻省理工学院的以为姓里 的女士提出的。
+
+- 该原则规定 在使用继承时，<font color='red'>在子类中可以扩展父类的功能，但是尽量不要重写父类的方法</font>。
+
+- 如果有2个类 A和B， B类继承A类。 那么在所有用到A类对象的地方，都可以用B类对象来替换。 **这就是里氏替换原则的完美状态。**
+
+  - 因为要求是在所有地方，所以如果想要达到此效果，B类就不能修改A类中的任何方法。
+
+  例：
+
+  ```java
+  class A{
+      public void sayHello(){
+          System.out.println("hello");
+      }
+  }
+  
+  class B extends A{
+  
+  }
+  
+  public class Example {
+      @Test
+      public void test(){
+          A a = new A();  
+          a.sayHello();
+          //如果使用B类对象来替换
+          //A a = new B();
+          // a.sayHello(); 所完成的效果是一样的。   
+          //因为要求是在所有地方，所以如果想要达到此效果，B类就不能修改A类中的任何方法。
+      }
+  }
+  
+  
+  ```
+
+  
+
+-  里氏替换原则告诉我们，继承实际上让两个类耦合性增强了，在适当的情况下，可以通过聚合，组合，依赖 来解决问题。
+
+**举例说明：**
+
+```java
+
+class A{
+    public void method(){
+        System.out.println("A,B类共有的方法");
+    }
+    public void sayHello(){
+        System.out.println("A say hello");
+    }
+}
+
+//	B继承与A，并且重写了A类的sayHello( )方法。 由于没有重写method()方法， 所以B类和A类的method()是一样的
+class B extends A{
+    @Override
+    public void sayHello(){
+        System.out.println("B say hello");
+    }
+}
+```
+
+
+
+这样很现实并没有遵循里氏替换原则，所以我们要对其进行修改。
+
+我们吧A和B中共有的单独抽出来放到一个新的基础类中，让A1,B1分别继承Base类。 这样A1和B1就不再是继承关系。 
+
+```java
+class Base{
+    //把共有的方法单独抽出来
+    public void method(){
+        System.out.println("A,B共有的方法");
+    }
+}
+
+class A1 extends Base{
+    public void sayHello(){
+        System.out.println("A1 say hello");
+    }
+}
+
+class B1 extends Base{
+    public void sayHello(){
+        System.out.println("B1 say hello");
+    }
+}
+
+```
+
+经过这样的解耦，很显然A1和B1都遵循了里氏替换原则，因为他们都没有修改Base类中的方法。
+
+UML图如下：
+
+![image-20210616175746649](README.assets/image-20210616175746649.png)
+
+
+
+如果想要在B1中访问A1的方法， 就可以通过使用组合关系，来访问A1的方法。
+
+例：
+
+```java
+class B1 extends Base{
+    //在B1中创建一个A1类对象的成员变量
+    private A1 a1 = new A1();
+    public void sayHello(){
+        System.out.println("B1 say hello");
+    }
+    
+    
+    public void sayHello1(){
+        //通过该对象即可使用A1类中的方法
+        a1.sayHello();
+    }
+}
+```
+
+对应的UML图如下：
+	![image-20210616181057234](README.assets/image-20210616181057234.png)
+
+
+
+
+
