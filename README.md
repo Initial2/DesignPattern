@@ -67,7 +67,7 @@ class VehicleTest{
 
 
 
-![image-20210610144716749](Picture/image-20210610144716749.png)
+![image-20210610144716749](README.assets/image-20210610144716749.png)
 
 很显然，这个Vehicle类违反了单一职责原则。 因为不管是汽车，飞机，轮船都可以在公路上跑是不对的。不同的交通工具应该有不同的运行方式。
 
@@ -785,7 +785,8 @@ class B1 extends Base{
 ```
 
 对应的UML图如下：
-	![image-20210616181057234](README.assets/image-20210616181057234.png)
+
+​	![image-20210616181057234](README.assets/image-20210616181057234.png)
 
 
 
