@@ -1,3 +1,7 @@
+
+
+[toc]
+
 # 设计模式概述
 
 **<font color='green'>设计模式的目的：</font>**
@@ -24,6 +28,8 @@
     5. <font color='red'>开闭原则 </font>
     6. <font color='red'> 迪米特法则 </font>
     7. <font color='red'>合成复用原则</font>
+
+---
 
 
 
@@ -176,6 +182,8 @@ class Vehicle2{
 -  提高类的可读性，可维护性 
 - 降低变更引起的风险 
 - 通常情况下，我们应当遵守单一职责原则，<font color='red'>只有逻辑足够简单，才可以在代码级别违反单一职责原则</font>；<font color='red'>只有类中方法数量足够少，可以在方法级别保持单一职责原则</font>
+
+---
 
 
 
@@ -395,6 +403,8 @@ public class InterfaceTest {
 ```
 
 
+
+---
 
 
 
@@ -651,6 +661,8 @@ public class DependencyPass3 {
 
 
 
+---
+
 
 
 # 里氏替换原则(Liskov Substitution Principle)
@@ -789,6 +801,8 @@ class B1 extends Base{
 ​	![image-20210616181057234](README.assets/image-20210616181057234.png)
 
 
+
+---
 
 
 
@@ -937,6 +951,8 @@ class Triangle extends Shape {
   - 很显然，当我们还想要增加绘制新的图形时，根本不需要去动使用方的代码。 只需要新增一个实现类即可。
   - 然后让此实现类作为参数传给draw()方法即可。
   - 使用方的代码就不需要修 -> 满足了开闭原则。
+
+---
 
 
 
@@ -1107,6 +1123,234 @@ class SchoolManager {
 
 - 迪米特法则的核心是<font color='red'>降低类之间的耦合</font>
 - 但是注意：由于每个类都减少了不必要的依赖，因此迪米特法则<font color='red'>只是要求降低 类间(对象间)耦合关系， 并不是要求完全没有依赖关系</font>
+
+
+
+---
+
+
+
+# 合成复用原则(Composite Reuse Principle）
+
+**基本介绍：**
+
+- 原则是<font color='red'>尽量使用合成/聚合的方式，而不是使用继承</font>
+- 使用继承的话，会增加他们之间的耦合性，这样并不好。
+
+
+
+**举例说明：**  假如A中有两个方法method1和method2.  B想用这两个方法。
+
+
+
+- 解决方式1： 使用继承关系，让B继承A类，就可以用A类中两个方法。
+
+  该方法会增加他们之间的耦合性，这样并不好。
+
+  ![image-20210617151331444](README.assets/image-20210617151331444.png)	
+
+- 解决方式2：  让B通过方法参数来调用A中的方法。 这样就降低了耦合度。 并且符合了迪米特法则。
+
+  A是B的直接朋友。
+
+  ​	![image-20210617152754483](README.assets/image-20210617152754483.png)
+
+  
+
+- 解决方式3： 让B中新建一个成员变量，该变量是A类型的。 通过set方法来给该变量赋值
+
+  ![image-20210617152422130](README.assets/image-20210617152422130.png)	
+
+- 解决方法4：  让B中直接新建一个A类型的对象。 
+
+  ![image-20210617152710827](README.assets/image-20210617152710827.png)	
+
+
+
+
+
+---
+
+
+
+#  设计原则核心思想
+
+- 找出应用中可能需要变化之处，把它们独立出来，不要和那些不需要变化的代码混在一起。 
+- 针对接口编程，而不是针对实现编程。 
+- 为了交互对象之间的松耦合设计而努力
+
+
+
+---
+
+
+
+
+
+# UML图介绍
+
+**基本介绍：**
+
+- UML——Unified modeling language UML (统一建模语言)，是一种用于软件系统 分析和设计的语言工具，它用于帮助软 件开发人员进行思考和记录思路的结果。
+-  UML本身是一套符号的规定，就像数学 符号和化学符号一样，这些符号用于描 述软件模型中的各个元素和他们之间的 关系，比如类、接口、实现、泛化、依 赖、组合、聚合等。
+
+
+
+---
+
+
+
+## UML类图
+
+- 他是UML图的一种
+
+- 用于<font color='red'>描述系统中的类(对象)本身的组成和类(对象)之间的各种静态关系</font>。 
+- 类之间的关系：<font color='red'>依赖、泛化（继承）、实现、关联、聚合与组合</font>。
+
+**依赖关系：**
+
+- 只要是在类中用到了对方，那么他们之间就存在依赖关系。 所以他是一种很**宽泛**的概念。 
+
+  
+
+**泛化关系**：
+
+- 其实就是继承关系，他是**依赖关系的一种特例**。
+
+  
+
+**实现关系：**
+
+- 其实就是一个类实现了另一个类。 他也是**依赖关系的一种特例**。
+
+  
+
+**关联关系：**
+
+- 实际上就是**类与类之间的联系**，**他是依赖关系的特例**。 
+
+
+
+**聚合关系：**
+
+- 表示的是整体和部分的关系，<font color='red'>整体与部分可以分开</font> 。 <font color='red'>是关联关系的特例</font>。
+- 我中包含了你，但是就算没有你，我也可以运行。 contains关系 
+
+- 举例：
+
+  ```Java
+  public class Computer {
+  	private Mouse mouse; 
+  	private Moniter monitor;
+  	public void setMouse(Mouse mouse) {
+  		this.mouse = mouse;
+  	}
+  	public void setMonitor(Moniter monitor) {
+  		this.monitor = monitor;
+  	}
+  	
+  }
+  ```
+
+  在`Computer`类中， `mouse`和`monitor`他们两个是可以分离的。 因为如果我们不通过`setMouse`和`setMonitor`方法对他们两个进行赋值时，
+
+  他们两个其实是没用的，是一个空的变量。 
+
+  ![image-20210617164547259](README.assets/image-20210617164547259.png)	
+
+
+
+**组合关系：**
+
+- **也是整体与部分的关系，但是整体与部分不可以分开**。
+
+- **举例：**
+
+  ```java
+  class Computer{
+      private Mouse mouse; 
+  	private Moniter monitor;
+      //CPU和Computer就是组合关系。 当Computer创建对象时，cpu这个对象就一定会被创建好
+  	private CPU cpu = new CPU();
+  	public void setMouse(Mouse mouse) {
+  		this.mouse = mouse;
+  	}
+  	public void setMonitor(Moniter monitor) {
+  		this.monitor = monitor;
+  	}
+  
+  }
+  
+  ```
+
+  很显然，一台电脑如果想要运行，就不能没有CPU。 就算没有显示器和鼠标，电脑都能运行。 
+
+  所以CPU就和Computer是组合关系。Computer包含CPU，但是不能分离CPU。 
+
+  从上述代码层面来看：  `mouse`和`monitor`对象如果不调用`setMouse`和`setMonitor`方法就无法被赋值使用。 但是`cpu`这个对象，从`Computer`对象创建完成，他也会创建完成。 它是随着computer对象的出现而出现。  
+
+![image-20210617164936669](README.assets/image-20210617164936669.png)					
+
+
+
+- 组合关系不一定都是上述例子的那种形式。 只要是不可分离的都可以。
+
+  - 比如说给上述代码修改，
+
+  - ```java
+    class Computer{
+        private Mouse mouse; 
+    	private Moniter monitor;
+        public Computer{
+            //把创建cpu的对象放到构造方法中。 仍然是聚合关系
+            private CPU cpu = new CPU();
+        }
+    	public void setMouse(Mouse mouse) {
+    		this.mouse = mouse;
+    	}
+    	public void setMonitor(Moniter monitor) {
+    		this.monitor = monitor;
+    	}
+    }
+    
+    ```
+
+    
+
+---
+
+
+
+## IDEA插件 PlantUML使用介绍
+
+- 定义权限
+
+  
+
+  ![image-20210617155926412](README.assets/image-20210617155926412.png)	
+
+- 类与类之间的关系：
+
+  - 依赖关系:
+    - `..>`
+  - 泛化关系
+    - `<|--` 来表示泛化关系
+  - 实现关系
+    - `<|..`
+  - 关联关系
+    - `-->`
+  - 聚合关系
+    - `--o`
+  - 组合关系
+    - `*--`
+
+- 注释和模板
+
+  ![image-20210617165848438](README.assets/image-20210617165848438.png)
+
+
+
+
 
 
 
