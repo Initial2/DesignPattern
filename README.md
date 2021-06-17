@@ -792,3 +792,339 @@ class B1 extends Base{
 
 
 
+# 开闭原则（Open Closed Principle）
+
+
+
+**基本介绍：**
+
+- <font color='red'>是编程中最基础、最重要的设计原则</font>。
+
+- 一个软件实体如**类**，**模块**和**函数**应该<font color='red'>对扩展开放(对提供方)</font>，对<font color='red'>修改关闭(对使用 方)</font>。用抽象构建框架，用实现扩展细节。
+
+  - 也就是说，当我们去扩展一个新的功能时，应该只去修改提供方的代码，而使用方最好不要动。
+
+- 当软件需要变化时，<font color='red'>尽量通过扩展软件实体的行为来实现变化，而不是通过修改已 有的代码来实现变化</font>。
+
+  - 尽量不要通过修改原有的代码来实现新的功能，可以通过增加新的方法。 因为原有的代码可能被别的地方使用
+
+    如果进行修改，有可能会出错。
+
+-  **<font color='red'>编程中遵循其它原则，以及使用设计模式的目的就是遵循开闭原则</font>**。
+
+
+
+**举例说明：**
+
+```java
+
+//这是一个用于绘图的类 [使用方]
+class GraphicEditor {
+    //接收Shape对象，然后根据type，来绘制不同的图形
+    public void drawShape(Shape s) {
+        if (s.m_type == 1)
+            drawRectangle(s);
+        else if (s.m_type == 2)
+            drawCircle(s);
+        //新增一个画三角形的方法，就要多一个判断条件
+        else if (s.m_type == 3)
+            drawTriangle(s);
+    }
+    
+    //绘制矩形
+    public void drawRectangle(Shape r) {
+        System.out.println(" 绘制矩形 ");
+    }
+    
+    //绘制圆形
+    public void drawCircle(Shape r) {
+        System.out.println(" 绘制圆形 ");
+    }
+    
+    //新增绘制三角形的方法  
+    public void drawTriangle(Shape r) {
+        System.out.println(" 绘制三角形 ");
+    }
+}
+
+//下面的图形类都是提供方
+
+//Shape类，基类 
+class Shape {
+    int m_type;
+}
+
+class Rectangle extends Shape {
+    Rectangle() {
+        super.m_type = 1;
+    }
+}
+
+class Circle extends Shape {
+    Circle() {
+        super.m_type = 2;
+    }
+}
+
+//新增画三角形
+class Triangle extends Shape {
+    Triangle() {
+        super.m_type = 3;
+    }
+}
+
+```
+
+
+
+- 当我们去新增一个画其他图形的功能时，不仅要新建一个图形的class，还要再使用方的代码中提供相应的判断，和绘制方法。
+
+-  违反了设计模式的ocp原则，即对扩展开放(提供方)，对修改关闭(使用方)。 即当我们给类增加新功能的时候，尽量不修改代码，或者尽可能少修改代码.
+
+**改进方案：**
+
+- 我们可以抽象出来一个图形基类，该类为抽象类，有一个绘制图形的方法。 其他图形类只要继承他实现方法即可。
+
+  ```java
+  //抽象基类
+  abstract class Graphic{
+      abstract void draw();
+  }
+  
+  
+  class Circle1 extends Graphic{
+      @Override
+      void draw() {
+          System.out.println(" 绘制圆形 ");
+      }
+  }
+  
+  class Triangle1 extends Graphic{
+      @Override
+      void draw() {
+          System.out.println(" 绘制三角形 ");
+      }
+  }
+  
+  class Rectangle1 extends Graphic{
+      @Override
+      void draw() {
+          System.out.println(" 绘制矩形 ");
+      }
+  }
+  
+  //图形绘制类，使用方 
+  class GraphicEditor1{
+      //通过调用不同实现类的draw()方法，来绘制不同的图形
+      public void draw(Graphic graphic){
+          graphic.draw();
+      }
+  }
+  
+  //测试
+  public class Ocp {
+      @Test
+      public void test(){
+          GraphicEditor1 graphicEditor1 = new GraphicEditor1();
+          graphicEditor1.draw(new Circle1());
+          graphicEditor1.draw(new Triangle1());
+          graphicEditor1.draw(new Rectangle1());
+      }     
+  }
+  
+  ```
+
+  - 很显然，当我们还想要增加绘制新的图形时，根本不需要去动使用方的代码。 只需要新增一个实现类即可。
+  - 然后让此实现类作为参数传给draw()方法即可。
+  - 使用方的代码就不需要修 -> 满足了开闭原则。
+
+
+
+# 迪米特法则(Demeter Principle)
+
+**基本介绍：**
+
+- 一个对象应该对其他对象保持最少的了解。
+- <font color='red'>迪米特法则(Demeter Principle)又叫最少知道原则</font>，即一个类对自己依赖的类知道的越少越好。也就是说，对于被依赖的类不管多么复杂，都尽量将逻辑封装在类的内部。对外除了提供的public 方法，不对外泄露任何信息。
+-  迪米特法则还有个更简单的定义：只与直接的朋友通信
+
+ **直接的朋友：**
+
+- 每个对象都会与其他对象有耦合关系，**只要两个对象之间有耦合关系，我们就说这两个对象之间是朋友关系**。耦合的方式很多，依赖，关联，组合，聚合
+  等。<font color='red'>其中，我们称出现成员变量，方法参数，方法返回值中的类为直接的朋友</font>，<font color='red'>而出现在局部变量中的类不是直接的朋友</font>。也就是说，陌生的类最好不要以局部变量的形式出现在类的内部。
+
+**举例说明：**
+
+```java
+//学校总部员工类
+class Employee {
+	private String id;
+
+	public void setId(String id) {
+		this.id = id;
+	}
+
+	public String getId() {
+		return id;
+	}
+}
+
+
+//学院的员工类
+class CollegeEmployee {
+	private String id;
+
+	public void setId(String id) {
+		this.id = id;
+	}
+
+	public String getId() {
+		return id;
+	}
+}
+
+
+//管理学院员工的管理类
+class CollegeManager {
+	//返回学院的所有员工
+	public List<CollegeEmployee> getAllEmployee() {
+		List<CollegeEmployee> list = new ArrayList<CollegeEmployee>();
+		for (int i = 0; i < 10; i++) { //这里我们增加了10个员工到 list
+			CollegeEmployee emp = new CollegeEmployee();
+			emp.setId("学院员工id= " + i);
+			list.add(emp);
+		}
+		return list;
+	}
+}
+
+//学校管理类
+
+//分析 SchoolManager 类的直接朋友类有哪些 -》 Employee、CollegeManager
+//CollegeEmployee 不是 直接朋友 而是一个陌生类，这样违背了 迪米特法则 
+class SchoolManager {
+	//返回学校总部的员工
+	public List<Employee> getAllEmployee() {
+		List<Employee> list = new ArrayList<Employee>();
+		
+		for (int i = 0; i < 5; i++) { //这里我们增加了5个员工到 list
+			Employee emp = new Employee();
+			emp.setId("学校总部员工id= " + i);
+			list.add(emp);
+		}
+		return list;
+	}
+
+	//该方法完成输出学校总部和学院员工信息(id)
+	void printAllEmployee(CollegeManager sub) {
+        
+		//获取到学院员工
+		List<CollegeEmployee> list1 = sub.getAllEmployee();
+		System.out.println("------------学院员工------------");
+		for (CollegeEmployee e : list1) {
+			System.out.println(e.getId());
+		}
+	
+		//获取到学校总部员工
+		List<Employee> list2 = this.getAllEmployee();
+		System.out.println("------------学校总部员工------------");
+		for (Employee e : list2) {
+			System.out.println(e.getId());
+		}
+	}
+}
+
+```
+
+​		很显然，前面设计的问题在于SchoolManager类中，CollegeEmployee类并不是 SchoolManager类的直接朋友。
+
+​		按照迪米特法则，应该避免类中出现这样非直接朋友关系的耦合.
+
+改进方案： 只对 CollegeManager 和 SchoolManager 修改，其他类不用动。 
+
+```java
+//管理学院员工的管理类
+class CollegeManager {
+	//返回学院的所有员工
+	public List<CollegeEmployee> getAllEmployee() {
+		List<CollegeEmployee> list = new ArrayList<CollegeEmployee>();
+		for (int i = 0; i < 10; i++) { //这里我们增加了10个员工到 list
+			CollegeEmployee emp = new CollegeEmployee();
+			emp.setId("学院员工id= " + i);
+			list.add(emp);
+		}
+		return list;
+	}
+   
+    //把打印员工的具体实现方法，封装到CollegeManager类中。 不要对外暴露
+    public void printAllEmployees(){
+     	 //获取到学院员工
+		List<CollegeEmployee> list1 = this.getAllEmployee();
+		System.out.println("------------学院员工------------");
+		for (CollegeEmployee e : list1) {
+			System.out.println(e.getId());
+		}
+    }
+}
+
+
+class SchoolManager {
+	//返回学校总部的员工
+	public List<Employee> getAllEmployee() {
+		List<Employee> list = new ArrayList<Employee>();
+		
+		for (int i = 0; i < 5; i++) { //这里我们增加了5个员工到 list
+			Employee emp = new Employee();
+			emp.setId("学校总部员工id= " + i);
+			list.add(emp);
+		}
+		return list;
+	}
+
+	//该方法完成输出学校总部和学院员工信息(id)
+	void printAllEmployee(CollegeManager sub) {
+        
+		//我们只需要在这里调用打印所有学院员工的方法即可。 把具体实现的方法封装到CollegeManager中
+        sub.printAllEmployees();
+        
+		//获取到学校总部员工
+		List<Employee> list2 = this.getAllEmployee();
+		System.out.println("------------学校总部员工------------");
+		for (Employee e : list2) {
+			System.out.println(e.getId());
+		}
+	}
+}
+
+
+```
+
+​			通过这样的改进，我们成功消除了陌生的朋友CollegeEmployee。 遵循了迪米特法则
+
+
+
+**迪米特法则注意事项和细节：**
+
+- 迪米特法则的核心是<font color='red'>降低类之间的耦合</font>
+- 但是注意：由于每个类都减少了不必要的依赖，因此迪米特法则<font color='red'>只是要求降低 类间(对象间)耦合关系， 并不是要求完全没有依赖关系</font>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
