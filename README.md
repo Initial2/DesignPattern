@@ -1,3 +1,21 @@
+# 设计模式
+
+* [设计模式概述](#设计模式概述)
+* [单一职责原则](#单一职责原则)
+* [接口隔离原则(Interface Segregation Principle)](#接口隔离原则interface-segregation-principle)
+* [依赖倒转原则(Dependence Inversion Principle)](#依赖倒转原则dependence-inversion-principle)
+    * [依赖关系传递的三种方式](#依赖关系传递的三种方式)
+    * [依赖倒转原则的注意事项和细节](#依赖倒转原则的注意事项和细节)
+* [里氏替换原则(Liskov Substitution Principle)](#里氏替换原则liskov-substitution-principle)
+* [开闭原则（Open Closed Principle）](#开闭原则（open-closed-principle）)
+* [迪米特法则(Demeter Principle)](#迪米特法则demeter-principle)
+* [合成复用原则(Composite Reuse Principle）](#合成复用原则composite-reuse-principle）)
+* [设计原则核心思想](#设计原则核心思想)
+* [UML图介绍](#uml图介绍)
+  * [UML类图](#uml类图)
+  * [IDEA插件 PlantUML使用介绍](#idea插件-plantuml使用介绍)
+
+
 
 
 [toc]
@@ -1347,6 +1365,346 @@ class SchoolManager {
 - 注释和模板
 
   ![image-20210617165848438](README.assets/image-20210617165848438.png)
+
+
+
+
+
+# 设计模式介绍
+
+- 设计模式是程序员在<font color='red'>面对同类软件工程设计问题所总结出来的有用的经验， 模式不是代码，而是某类问题的通用解决方案</font>，设计模式（Design pattern） 代表了最佳的实践。这些解决方案是众多软件开发人员经过相当长的一段时 间的试验和错误总结出来的。
+- 设计模式的本质提高 <font color='red'>软件的维护性，通用性和扩展性，并降低软件的复杂 度</font>。
+- 设计模式并不局限于某种语言，java，php，c++ 都有设计模式.
+
+
+
+**常见的设计模式类型：**
+
+分为三种类型，共23种，并不绝对，可能还会有某种类型的变种。 
+
+- 创建型模式： 
+  - 单例模式、抽象工厂模式、原型模式、建造者模式、工厂模式。
+- 结构型模式：
+  - 适配器模式、桥接模式、装饰模式、组合模式、外观模式、享 元模式、代理模式。
+- 行为型模式：
+  - 模版方法模式、命令模式、访问者模式、迭代器模式、观察者 模式、中介者模式、备忘录模式、解释器模式（Interpreter模式）、状态模式、策略模式、职责链模式(责任链模式)。
+
+
+
+
+
+
+
+
+
+## 单例模式
+
+**基本介绍：**
+
+- 所谓类的单例设计模式，就是采取一定的方法保证在整个的软件系统中，**对某个类只能存在一个对象实例，并且该类只提供一个取得其对象实例的方法(静态方法)**
+
+**单例模式有八种方式：**
+
+1. 饿汉式(静态常量) 
+2. 饿汉式（静态代码块） 
+3. 懒汉式(线程不安全) 
+4. 懒汉式(线程安全，同步方法) 
+5. 懒汉式(线程安全，同步代码块) 
+6. <font color='red'> 双重检查 （推荐使用）</font>
+7. <font color='red'>静态内部类（推荐使用） </font>
+8. <font color='red'>枚举（推荐使用）</font>
+
+
+
+### 饿汉式(静态常量) 
+
+- **步骤如下：** 
+
+  - 构造器私有化 (防止 new ) 
+  - 类的内部创建对象 
+  - 向外暴露一个静态的公共方法。getInstance
+
+- **代码举例：**
+
+  ```java
+  class SingleTon1{
+     
+      //1. 私有化构造器
+      public SingleTon1(){};
+      
+      //2. 创建一个私有静态常量对象
+      private static final SingleTon1  singleTon1 =  new SingleTon1();
+      
+      //3. 提供一个公共的getInstance方法，获取对象
+      public static  SingleTon1 getInstance(){
+          return singleTon1;
+      }
+  }
+  ```
+
+- **优缺点分析：**
+
+  **优点：**
+
+  - 这种写法比较简单，就是在类装载的时候就完成实例化(静态常量在类加载期间就会初始化)。避免了线程同 步问题。
+
+  **缺点：**
+
+  - 在类装载的时候就完成实例化，没有达到Lazy Loading(懒加载)的效果。如果从始 至终从未使用过这个实例，则会造成内存的浪费。
+
+  **结论：**
+
+  - 这种单例模式可用，可能造成内存浪费
+
+
+
+### 饿汉式（静态代码块）
+
+**具体步骤：**
+
+- 把对象的实例化放到了静态代码块中。
+
+
+
+**代码演示：**	
+
+```java
+class SingleTon2 {
+    
+    //1. 私有化构造器
+    public SingleTon2() {
+    }
+    
+    //2. 创建一个私有静态常量
+    private static final  SingleTon2 singleTon2;
+    
+    //3. 在静态代码块中给该对象创建出来
+    static {
+        singleTon2 = new SingleTon2();
+    }
+    
+    //4. 提供一个公共的getInstance方法，获取对象
+    public static SingleTon2 getInstance() {
+        return singleTon2;
+    }
+}
+```
+
+**优缺点：**
+
+- 与使用静态变量的优缺点一致。 因为他俩基本上是一样的。 
+
+
+
+### 懒汉式（线程不安全）
+
+**基本介绍：**
+
+- 用到了我再去创建对象的实例。 实现了Lazy Loadin懒加载的效果.
+
+**代码演示：**
+
+```java
+class SingleTon3{
+    
+    //1. 创建静态变量
+    private static SingleTon3 instance;
+    
+    //2. 私有化构造器
+    private SingleTon3(){}
+    
+    //3. 提供一个public方法，用于获取实例.
+    public static SingleTon3 getInstance(){
+        if (instance == null){
+            instance = new SingleTon3();
+        }
+        return instance;
+    }
+    
+}
+```
+
+**优缺点说明:**
+
+- 起到了Lazy Loading的效果，但是只能在单线程下使用。
+- 在多线程情况下，他是<font color='red'>线程不安全</font>的。 **所以不能在多线程情况下使用**
+
+
+
+
+
+### 懒汉式(同步方法， 线程安全）
+
+- 在上一个方法的基础上加入synchronized锁机制，来实现线程同步.
+
+
+
+**代码演示：**
+
+```java
+class SingleTon{
+    
+    //1. 创建静态变量
+    private static SingleTon instance;
+    
+    //2. 私有化构造器
+    private SingleTon(){}
+    
+    //3. 提供一个public方法，用于获取实例.
+    public static synchronized SingleTon getInstance(){
+        if (instance == null){
+            instance = new SingleTon();
+        }
+        return instance;
+    }
+    
+}
+```
+
+**优缺点说明：**
+
+- 解决了线程不安全问题
+- 效率太低了，每个线程在想获得类的实例时候，执行getInstance()方法都要进行 同步。
+
+
+
+
+
+### 懒汉式(同步代码块)
+
+![在这里插入图片描述](README.assets/20201115181925135.png)
+
+
+
+
+
+- **此方法并没有起到线程同步的作用**。虽然降低了锁的粒度，但是没有把最关键的if判断添加进去。
+- 在实际开发中，不能使用这种方式。
+
+
+
+
+
+### 双重判断
+
+**基本介绍：**
+
+- 使用`synchronized`和`volatile`关键字搭配使用，并且增加双重判断机制. 
+
+**代码演示：**
+
+```java
+
+class SingleTon{
+    
+    //1. 创建静态变量
+    private static volatile SingleTon instance;
+    
+    //2. 私有化构造器
+    private SingleTon(){}
+    
+    //3. 提供一个public方法，用于获取实例.
+    public static SingleTon getInstance(){
+        if (instance == null){
+            synchronized (SingleTon.class){
+                if (instance == null ){
+                    instance = new SingleTon();
+                }
+            }
+        }
+        return instance;
+    }
+    
+}
+```
+
+**优缺点说明：**
+
+-  Double-Check概念是多线程开发中常使用到的，如代码中所示，我们进行了两次if (singleton == null)检查，这样就可以保证线程安全了。
+- 这样，**实例化代码也就是同步代码块中的方法只用执行一次**，后面再次访问时，判断外层if (singleton == null)， 直接return实例化对象，也避免的反复进行方法同步.
+- 线程安全；延迟加载；效率较高
+- 在实际开发中，推荐使用这种单例设计模式
+
+
+
+### 静态内部类
+
+**基本介绍：**
+
+- 利用静态内部类的特性来实现单例模式
+
+
+
+**代码演示：**
+
+```java
+
+class Singleton{
+    //1. 私有化构造器
+    private SingleTon(){}
+    
+    //2. 创建一个私有的静态内部类
+    private static class SingletonInstance{
+        private static final  Singleton instance = new Singleton();
+    }
+    
+    //3. 设置一个public方法用于获取实例
+    public static Singleton getInstance(){
+        return SingletonInstance.instance;
+    }
+    
+}
+```
+
+**优缺点说明：**
+
+- **首先它实现了懒加载**。 因为在`Singleton`加载时，它的内部类`SingletonInstance`并不会被加载。 当我们调用`getInstance`方法时，才会加载此类。从而完成Singleton的实例化。
+- 类的静态属性只会在第一次加载类的时候初始化，所以在这里，JVM帮助我们保证了线程的安全性，在类进行初始化时别的线程是无法进入的。`instance`的实例化过程是**线程安全的**。
+- 避免了线程不安全，利用静态内部类特点实现延迟加载，效率高
+
+**推荐使用.**
+
+
+
+
+
+### 枚举
+
+- 还可以通过枚举类的方式来实现单例模式
+
+**代码演示：**
+
+```java
+enum Singleton{
+    INSTANCE;
+}
+```
+
+**优缺点说明：**
+
+-  这借助JDK1.5中添加的枚举来实现单例模式。不仅能避免多线程同步问题，而 且还能防止反序列化重新创建新的对象。
+- 可以防止通过反射来破坏单例
+- 推荐使用,实现简单
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
