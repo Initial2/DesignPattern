@@ -1706,23 +1706,208 @@ enum Singleton{
 
 
 
+### 单例模式在JDK中的应用
+
+- JDK的运行时类`Runtime`就是一个单例的
+
+  ![image-20210618181217816](README.assets/image-20210618181217816.png)	
+
+很显然他用的是单例模式的饿汉式。 直接创建对象，没有线程安全问题。 
 
 
 
 
 
+## 简单工厂模式
+
+**基本介绍：**
+
+- 简单工厂模式是属于创建型模式，是工厂模式的一种。**<font color='red'>简单工厂模式是由一 个工厂对象决定创建出哪一种产品类的实例</font>**。简单工厂模式是工厂模式家族 中最简单实用的模式
+-  简单工厂模式：<font color='red'>定义了一个创建对象的类，由这个类来封装实例化对象的行为(代码)</font>
+- 在软件开发中，当我们会用到大量的创建某种、某类或者某批对象时，就会 使用到工厂模式
+- 简单工厂模式 也叫 静态工厂模式 。 如果创建对象的方法是一个静态方法，那么就是一个静态工厂。
 
 
 
+**案例：**
+
+​	披萨订购案例：
+
+​	如果使用一般方式：
+
+![image-20210618204040134](README.assets/image-20210618204040134.png)	
 
 
 
+**部分代码：**
+
+```java
+public abstract class Pizza {
+    
+    protected String name;
+    
+    public abstract void prepare();
+    
+    public void bake(){
+        System.out.println("正在烘焙披萨");
+    }
+    public void cut(){
+        System.out.println("正在切割披萨");
+    }
+    public void box(){
+        System.out.println("正在打包披萨");
+    }
+    
+}
+
+
+public class GreekPizza  extends Pizza{
+    @Override
+    public void prepare() {
+        this.name = "Greek";
+        System.out.println("正在为希腊披萨准备材料");
+    }
+}
+
+
+public class CheesePizza  extends Pizza{ 
+    @Override
+    public void prepare() {
+        this.name = "奶酪披萨";
+        System.out.println("正在为奶酪披萨准备材料");
+    }
+}
 
 
 
+// PizzaStore是使用方 
+public class PizzaStore { 
+    public void orderPizza(){
+        //根据用户订购的种类，制作相关披萨
+        do {
+            String orderType = getType();
+            Pizza pizza;
+            if ("greek".equals(orderType)) {
+                pizza = new GreekPizza();
+            } else if ("cheese".equals(orderType)) {
+                pizza = new CheesePizza();
+            } else {
+                break;
+            }
+            //输出pizza 制作过程
+            pizza.prepare();
+            pizza.bake();
+            pizza.cut();
+            pizza.box();
+        
+        } while (true);
+    }
+    
+    
+    // 写一个方法，可以获取客户希望订购的披萨种类
+    private String getType() {
+        try {
+            BufferedReader string = new BufferedReader(new InputStreamReader(System.in));
+            System.out.println("input pizza 种类:");
+            return string.readLine();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return "";
+        }
+    }
+    
+}
+
+//测试方法
+public class PizzaTest {
+    public static void main(String[] args) {
+        PizzaStore pizzaStore = new PizzaStore();
+        pizzaStore.orderPizza();
+    }
+}
+
+```
+
+- 很显然，这样写的方式并不好。 他违背了OCP原则(开闭原则)。  
+- 当我们想要增加新的披萨种类时， 首先要去创建一个新的类来实现Pizza类。 然后还要去使用方`PizzaStore类`中修改 `orderPizza()`的逻辑。
+- 当我们有很多个PizzaStore时，要修改多次使用方代码逻辑。
+
+**改进方案：**
+
+- 把创建Pizza对象的实例化封装到一个类中，这样我们有新的Pizza种类时，只需要修改该类就可，其它有创建到Pizza对象的代码就不需要修改了.-> 简单工厂模式
+
+- 只对PizzaStore类进行修改，再添加一个工厂类，用于进行披萨类对象的实例化。
+
+  ![image-20210618210338277](README.assets/image-20210618210338277.png)	
+
+代码如下：
+
+```java
+
+public class PizzaStore {
+    
+    public void orderPizza(){
+        do {
+            String orderType = getType();
+              //根据用户订购的种类，制作相关披萨
+            Pizza pizza = SimpleFactory.createPizza(orderType);      
+            if (pizza != null){
+                //输出pizza 制作过程
+                pizza.prepare();
+                pizza.bake();
+                pizza.cut();
+                pizza.box();
+            }else{
+                break;
+            }
+        
+        } while (true);
+    }
+    
+    // 写一个方法，可以获取客户希望订购的披萨种类
+    private String getType() {
+        try {
+            BufferedReader string = new BufferedReader(new InputStreamReader(System.in));
+            System.out.println("input pizza 种类:");
+            return string.readLine();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return "";
+        }
+    }
+    
+}
 
 
+public class SimpleFactory {
+    
+    /**
+     * 根据传入的披萨类型，定做对应的披萨
+     * @return Pizza 返回定做的Pizza
+     */
+    public static Pizza createPizza(String type){
+        if ("greek".equals(type)) {
+           return new GreekPizza();
+        } else if ("cheese".equals(type)) {
+            return new CheesePizza();
+        //如果要添加新的Pizza种类，只需要增加一个if判断分支，然后创建对应对象即可。 
+        } else if ("pepper".equals(type)) {
+            return new PepperPizza();
+        }else {
+            return null;
+        }
+        
+    }
+    
+}
 
+```
+
+- 通过上述的改进，我们吧Pizza类对象的实例化，封装到了`SimpleFactory`这个工厂类中。 只需要传入对应的pizza种类，即可创建对应的对象。
+
+- 即使我们添加新的Pizza。 只需要添加一个新的实现类。 然后在`SimpleFactory`的`createPizza`方法添加对应的分支判断即可。 在我们的使用方，是完全不用修改代码的。 
+
+  
 
 
 

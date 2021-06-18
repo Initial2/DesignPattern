@@ -1,0 +1,49 @@
+@startuml
+
+abstract class Pizza{
+    name : String
+
+    + prepare() : void
+    + bake() : void
+    + cut() : void
+    + box() : void
+}
+
+class CheesePizza {
+
+}
+
+CheesePizza --|> Pizza
+
+class GreekPizza {
+
+}
+
+GreekPizza --|> Pizza
+
+class PepperPizza {
+
+}
+
+PepperPizza --|> Pizza
+
+
+class SimpleFactory{
+    + createPizza(orderType : String) : Pizza
+}
+SimpleFactory -->Pizza
+SimpleFactory --> CheesePizza
+SimpleFactory --> GreekPizza
+SimpleFactory --> PepperPizza
+
+class PizzaStore{
+    + orderPizza() : void
+    - getType() : String
+}
+
+PizzaStore --> SimpleFactory
+
+
+
+
+@enduml
