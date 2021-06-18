@@ -18,23 +18,6 @@
 
 
 
-# Table of Contents
-
-* [设计模式概述](#设计模式概述)
-* [单一职责原则](#单一职责原则)
-* [接口隔离原则(Interface Segregation Principle)](#接口隔离原则interface-segregation-principle)
-* [依赖倒转原则(Dependence Inversion Principle)](#依赖倒转原则dependence-inversion-principle)
-    * [依赖关系传递的三种方式](#依赖关系传递的三种方式)
-    * [依赖倒转原则的注意事项和细节](#依赖倒转原则的注意事项和细节)
-* [里氏替换原则(Liskov Substitution Principle)](#里氏替换原则liskov-substitution-principle)
-* [开闭原则（Open Closed Principle）](#开闭原则（open-closed-principle）)
-* [迪米特法则(Demeter Principle)](#迪米特法则demeter-principle)
-* [合成复用原则(Composite Reuse Principle）](#合成复用原则composite-reuse-principle）)
-* [设计原则核心思想](#设计原则核心思想)
-* [UML图介绍](#uml图介绍)
-  * [UML类图](#uml类图)
-  * [IDEA插件 PlantUML使用介绍](#idea插件-plantuml使用介绍)
-
 
 # 设计模式概述
 
