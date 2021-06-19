@@ -1701,7 +1701,11 @@ enum Singleton{
 
 
 
-## 简单工厂模式
+## 工厂模式
+
+
+
+### 简单工厂模式
 
 **基本介绍：**
 
@@ -1896,6 +1900,240 @@ public class SimpleFactory {
 
 
 
+### 工厂方法模式
+
+**基本介绍：**
+
+- 工厂方法让<font color='red'>类的实例化推迟到子类中进行</font>。
+- 工厂方法模式通过定义一个单独的创建对象的抽象方法来解决这些问题。由子类实现这个方法来创建具体类型的对象。
+
+
+
+**举例说明：**
+
+![在这里插入图片描述](README.assets/2020111610470340.png)	
+
+
+
+披萨种类有很多种，并且不同地域的披萨也不相同。  北京披萨，伦敦披萨...。  所以我们在`OrderPizza`这个抽象类中定义一个抽象方法`createPizza()`,让他的工厂子类来继承实现该方法，去创建对应的披萨实例。
+
+
+
+**部分代码：**
+
+```java
+//工厂类
+public abstract class OrderPizza {
+    
+    //创建Pizza的方法由具体的工厂子类来实现。 推迟到子类实现
+    abstract Pizza createPizza(String type);
+    
+    public void orderPizza(){
+        String type = getType();
+        Pizza pizza = createPizza(type);
+        pizza.prepare();
+        pizza.bake();
+        pizza.cut();
+        pizza.box();
+        
+    }
+     
+    // 写一个方法，可以获取客户希望订购的披萨种类
+    private String getType() {
+        try {
+            BufferedReader string = new BufferedReader(new InputStreamReader(System.in));
+            System.out.println("input pizza 种类:");
+            return string.readLine();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return "";
+        }
+    }
+}
+
+public class OrderBJPizza  extends OrderPizza{   
+    //工厂子类来具体实现去创建哪种地域的披萨。
+    @Override
+    Pizza createPizza(String orderType) {
+        Pizza pizza = null;
+        if("cheese".equals(orderType)) {
+            pizza = new BJCheesePizza();
+        } else if ("pepper".equals(orderType)) {
+            pizza = new BJPepperPizza();
+        }
+        return pizza;
+    }   
+}
+
+public class OrderLDPizza extends OrderPizza{
+    //工厂子类来具体实现去创建哪种地域的披萨。
+    @Override
+    Pizza createPizza(String orderType) {
+        Pizza pizza = null;
+        if("cheese".equals(orderType)) {
+            pizza = new LDCheesePizza();
+        } else if ("pepper".equals(orderType)) {
+            pizza = new LDPepperPizza();
+        }      
+        return pizza;
+    }    
+}
+
+
+public class PizzaStore {
+    public static void main(String[] args) {
+        String loc = "bj";
+        if (loc.equals("bj")) {
+            //创建北京口味的各种Pizza
+            OrderBJPizza orderBJPizza = new OrderBJPizza();
+            orderBJPizza.orderPizza();
+        } else {
+            //创建伦敦口味的各种Pizza
+            OrderLDPizza orderLDPizza = new OrderLDPizza();
+            orderLDPizza.orderPizza();
+        }     
+    }
+}
+
+```
+
+- 该方法显然违背了OCP原则。 当我们添加新的地域的pizza时，需要修改使用方，也就是`PizzaStore`中的代码.
+
+### 抽象工厂模式
+
+**基本介绍：**
+
+- 抽象工厂模式提供了一种方式，可以将一组具有同一主题的单独的工厂封装起来。在正常使用中，客户端程序需要创建抽象工厂的具体实现，然后使用抽象工厂作为接口来创建这一主题的具体对象。
+- 从设计层面看，抽象工厂模式就是对简单工厂模式的改进(或者称为进一步的抽象)。
+- 将工厂抽象成两层，AbsFactory(抽象工厂) 和 具体实现的工厂子类。程序员可以根据创建对象类型使用对应的工厂子类。这样将单个的简单工厂类变成了工厂簇，更利于代码的维护和扩展。
+
+
+
+**代码演示：**
+
+
+
+![在这里插入图片描述](README.assets/20201116105350915.png)	
+
+
+
+
+
+```java
+//抽象工厂
+public interface AbsFactory {
+    Pizza createPizza(String type);
+}
+
+//抽象工厂的具体实现子类
+public class LDFactory implements AbsFactory{
+    @Override
+    public Pizza createPizza(String orderType) {
+        Pizza pizza = null;
+        if("cheese".equals(orderType)) {
+            pizza = new LDCheesePizza();
+        } else if ("pepper".equals(orderType)){
+            pizza = new LDPepperPizza();
+        }
+        return pizza;
+    }
+}
+
+//抽象工厂的具体实现子类
+public class BJFactory  implements AbsFactory{
+    @Override
+    public Pizza createPizza(String orderType) {
+        Pizza pizza = null;
+        if("cheese".equals(orderType)) {
+            pizza = new BJCheesePizza();
+        } else if ("pepper".equals(orderType)){
+            pizza = new BJPepperPizza();
+        }
+        return pizza;
+    }
+}
+
+
+//使用方
+public class PizzaStore {
+    public void orderPizza(AbsFactory factory){
+        String type = getType();
+        Pizza pizza = factory.createPizza(type);
+        pizza.prepare();
+        pizza.bake();
+        pizza.cut();
+        pizza.box();
+    }
+    
+    
+    // 写一个方法，可以获取客户希望订购的披萨种类
+    private String getType() {
+        try {
+            BufferedReader strin = new BufferedReader(new InputStreamReader(System.in));
+            System.out.println("input pizza 种类:");
+            String str = strin.readLine();
+            return str;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return "";
+        }
+    }
+    
+}
+
+
+public class PizzaTest {
+    public static void main(String[] args) {
+        PizzaStore pizzaStore = new PizzaStore();
+        pizzaStore.orderPizza(new LDFactory());
+    }
+}
+
+```
+
+- 当我们需要增加新的地方的pizza时，完全不需要修改使用方的代码。 只需增加相应的工厂实现子类和pizza类即可。 遵循了OCP原则
+
+
+
+
+
+
+
+### 工厂模式小结：
+
+**工厂模式的意义**： 
+
+- 将实例化对象的代码提取出来，放到一个类中统一管理和维护，达到和主项目的依赖关系的解耦。从而提高项目的扩展和维护性。
+- 设计模式的依赖抽象原则 创建对象实例时，不要直接 new 类, 而是把这个new 类的动作放在一个工厂的方法中，并返回。
+- 不要让类继承具体类，而是继承抽象类或者是实现interface(接口)
+
+
+
+**在JDK中的应用：**
+
+- Calender类就使用了静态工厂模式
+
+  ![image-20210619153431707](README.assets/image-20210619153431707.png)	
+
+  通过调用`getInstance`来获取`calender`类实例.
+
+- 该方法又去调用`createCalender`方法
+
+  ![image-20210619153549841](README.assets/image-20210619153549841.png)	
+
+- 根据不同种类 来创建不同的对象
+
+
+
+## 原型模式
+
+**基本介绍：**
+
+- 用原型实例指定创建对象的种类，并且通过拷贝这些原型，创建新的对象
+- 原型模式是一种创建型设计模式，<font color='red'>允许一个对象再创建另外一个可定制的对象， 无需知道如何创建的细节</font>
+- 工作原理是:   通过将一个原型对象传给那个要发动创建的对象，这个要发动创建的对象通过请求原型对象拷贝它们自己来实施创建，即对象.clone()
+
+![原型模式](README.assets/20201116144230122.png)
 
 
 
@@ -1905,8 +2143,280 @@ public class SimpleFactory {
 
 
 
+**案例：**
+
+- 假如有一只羊
+
+  ```java
+  //这些是羊的属性。
+  private int age;
+  private String name;
+  private String colors;
+  
+  //省略了get/set方法 还有toString()
+  ```
+
+- 当我们要执行一个操作，创建5只一模一样的羊(属性相同)。
+
+  ```java
+   @Test
+      public void test(){
+          //创建原型
+          Sheep sheep1 = new Sheep(5, "tom", "white");
+          
+          //最原始的拷贝方式。  手动创建新的对象，属性值和源对象属性值相同
+          Sheep sheep2 = new Sheep(sheep1.getAge(), sheep1.getName(), sheep1.getColors());
+          Sheep sheep3 = new Sheep(sheep1.getAge(), sheep1.getName(), sheep1.getColors());
+          Sheep sheep4 = new Sheep(sheep1.getAge(), sheep1.getName(), sheep1.getColors());
+          Sheep sheep5 = new Sheep(sheep1.getAge(), sheep1.getName(), sheep1.getColors());
+      
+          System.out.println(sheep1);
+          System.out.println(sheep2);
+          System.out.println(sheep3);
+          System.out.println(sheep4);
+          System.out.println(sheep5);
+          
+      }
+  ```
+
+  - 这种方式非常原始，并且效率低下。 所以需要改进.
+
+**改进方案：**
+
+- **使用原型模式**
+
+- 让Sheep类实现`Cloneable`接口通过调用`Object类`中的`clone()`方法来克隆对象。
+
+```java
+// 要让Sheep实现Cloneable接口
+public class Sheep implements Cloneable {
+    //省略了类的细节...
+   
+    //利用Object.clone()来实现对象克隆
+     @Override
+    protected Sheep clone() throws CloneNotSupportedException {
+        return (Sheep) super.clone();
+    }
+}
 
 
+//测试
+    @Test
+    public void testCopy() {
+        Sheep sheep1 = new Sheep(5, "tom", "white");
+        
+        //利用原型模式进行对象克隆
+        Sheep sheep2 = null;
+        Sheep sheep3 = null;
+        Sheep sheep4 = null;
+        Sheep sheep5 = null;
+        try {
+            sheep2 = sheep1.clone();
+            sheep3 = sheep1.clone();
+            sheep4 = sheep1.clone();
+            sheep5 = sheep1.clone();
+        } catch (CloneNotSupportedException e) {
+            e.printStackTrace();
+        }
+        System.out.println(sheep1);
+        System.out.println(sheep2);
+        System.out.println(sheep3);
+        System.out.println(sheep4);
+        System.out.println(sheep5);
+    
+        System.out.println(sheep1 == sheep2);
+    }
+    
+    
+```
+
+- 该方法效率就非常高。 当我们想克隆对象时，只需要调用`对象.clone()`方法即可.
+
+- 但是，**Object的clone()方法是默认使用浅拷贝的**。 
+
+  - 对于数据类型是基本数据类型的成员变量，浅拷贝会直接进行**值传递**，也就是将 该属性值复制一份给新的对象。
+  - 对于数据类型是引用数据类型的成员变量，比如说成员变量是某个数组、某个类 的对象等，那么浅拷贝会进行**引用传递**
+  - 实际上两个对象的该成员变量都指向同一个 实例。在这种情况下，在一个对象中修改该成员变量会影响到另一个对象的该成 员变量值
+
+  ![image-20210619170423716](README.assets/image-20210619170423716.png)
+
+- 例如：
+
+  ```java
+  public class Sheep implements Cloneable {
+      private int age;
+      private String name;
+      private String colors;
+      //在Sheep中新增一个引用类型变量
+      private Sheep friend ;
+      
+      //省略其他代码
+  }
+  
+   	@Test
+      public void testCopy() {
+          Sheep sheep1 = new Sheep(5, "tom", "white");
+          //设置原型类中引用变量的值
+          sheep1.setFriend( new Sheep(4,"jerry","black"));
+          
+       	//开始拷贝,利用原型模式
+          Sheep sheep2 = null;
+          Sheep sheep3 = null;
+          Sheep sheep4 = null;
+          Sheep sheep5 = null;
+          try {
+              sheep2 = sheep1.clone();
+              sheep3 = sheep1.clone();
+              sheep4 = sheep1.clone();
+              sheep5 = sheep1.clone();
+          } catch (CloneNotSupportedException e) {
+              e.printStackTrace();
+          }
+          
+          
+          System.out.println(sheep1 + "\tfriend = "+ sheep1.getFriend());
+          System.out.println(sheep2+ "\tfriend = "+ sheep2.getFriend());
+          System.out.println(sheep3+ "\tfriend = "+ sheep3.getFriend());
+          System.out.println(sheep4+ "\tfriend = "+ sheep4.getFriend());
+          System.out.println(sheep5+ "\tfriend = "+ sheep5.getFriend());
+      
+          System.out.println(sheep1.getFriend() == sheep2.getFriend()); //值为true
+          System.out.println(sheep2.getFriend() == sheep3.getFriend()); //值为true
+          System.out.println(sheep2.getFriend() == sheep4.getFriend()); //值为true
+          System.out.println(sheep2.getFriend() == sheep5.getFriend()); //值为true
+      }
+  ```
+
+  - 每一只被复制的羊中的`friend`属性都和原型中的`friend`属性指向相同的一个对象实例。
+
+  - 由此可见，当我们调用clone()方法进行对象拷贝时，对于`sheep1`中引用类型的属性`friend`，其他对象`sheep2 sheep3...`只是把该引用复制一份, 让他们的`friend`属性也指向和原型类中的属性相同的内存地址。
+
+    ![image-20210619171838502](README.assets/image-20210619171838502.png)	
+
+​    
+
+
+
+
+
+
+
+​    
+
+### 原型模式深拷贝的两种方式
+
+**方式1：** 
+
+- 重写clone()方法，来实现深拷贝。
+
+  ```java
+  public class Sheep implements Cloneable {
+      private int age;
+      private String name;
+      private String colors;
+      //引用类型friendList，用来存放小羊的朋友的名字。 是一个列表
+      private ArrayList<String> friendList ;
+      
+      ...省略其他方法和内容
+      
+      //方法1. 通过重写clone()方法来实现深拷贝
+      @Override
+      protected Sheep clone() throws CloneNotSupportedException {
+          //1. 首先把他的基本数据类型全部拷贝
+          Sheep sheep = (Sheep) super.clone();
+              
+          //2. 针对于它的引用数据类型每一个都单独处理. 单独进行拷贝
+          sheep.friendList = (ArrayList<String>) friendList.clone();
+      	
+          //如果该类还有其他引用类型，需要挨个进行拷贝
+          
+          return sheep;
+      }
+  }
+  
+  //测试
+   	@Test
+      public void testCopy() {
+          Sheep sheep1 = new Sheep(5, "tom", "white");
+          ArrayList<String> list = new ArrayList<>();
+          list.add("jerry");
+          list.add("Bob");
+          list.add("Maria");
+          
+          sheep1.setFriendList(list);
+             
+          Sheep sheep2 = null;
+          Sheep sheep3 = null;     
+          try {
+              sheep2 = sheep1.clone();
+              sheep3 = sheep1.clone();
+           
+          } catch (CloneNotSupportedException e) {
+              e.printStackTrace();
+          }
+          
+          System.out.println(sheep1 + "\tfriend = "+ sheep1.getFriendList());
+          System.out.println(sheep2+ "\tfriend = "+ sheep2.getFriendList());
+          System.out.println(sheep3+ "\tfriend = "+ sheep3.getFriendList());
+      	
+          System.out.println(sheep1.getFriendList() == sheep2.getFriendList()); //false
+          System.out.println(sheep1.getFriendList() == sheep3.getFriendList()); //false
+          System.out.println(sheep2.getFriendList() == sheep3.getFriendList()); //false
+      }
+  ```
+
+  
+
+**方式2：**（推荐使用）
+
+- 通过序列化和反序列化来实现(推荐使用)
+
+  ```java
+  // 让我们Sheep类实现Serializable接口
+  public class Sheep implements  Serializable{
+      //提供一个序列号
+  	 private static final long serialVersionUID = 1231521512L;
+      
+      ...省略其他代码
+          
+          
+       public Sheep deepClone() {
+          ByteArrayOutputStream bos = null;
+          ObjectOutputStream oos = null;
+          ByteArrayInputStream bis = null;
+          ObjectInputStream ois = null;
+          try {
+              bos = new ByteArrayOutputStream();
+              //让oos把对象写出到bos这个字节数组中
+              oos = new ObjectOutputStream(bos);
+              
+              oos.writeObject(this);
+              
+              //反序列化读取此对象
+              bis = new ByteArrayInputStream(bos.toByteArray());
+              ois = new ObjectInputStream(bis);
+              //读出来然后返回
+             return  (Sheep)ois.readObject();
+          } catch (IOException | ClassNotFoundException e) {
+              e.printStackTrace();
+              return null;
+          } finally {
+              //关闭资源....
+          }
+  }
+  ```
+
+  - 此方法不用再针对每个引用成员变量进行分别操作。 比较方便.
+
+
+
+**原型模式的注意事项和细节:**
+
+- 创建新的对象比较复杂时，可以利用原型模式简化对象的创建过程，同时也能够提 高效率
+- 不用重新初始化对象，而是动态地获得对象运行时的状态.   如果原始对象发生变化(增加或者减少属性)，其它克隆对象的也会发生相应的变化， 无需修改代码
+- 缺点：需要为每一个类配备一个克隆方法，这对全新的类来说不是很难，但对已有 的类进行改造时，需要修改其源代码，违背了ocp原则. 
+
+### 
 
 
 
