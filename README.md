@@ -2822,3 +2822,142 @@ public class Client {
 - Adapter模式最大的作用还是将原本不兼容的接口融合在一起工作。
 -  实际开发中，实现起来不拘泥于我们讲解的三种经典形式
 
+
+
+
+
+## 桥接模式（Bridge Pattern）
+
+**基本介绍：**
+
+- 桥接模式(Bridge模式)是指：**将实现与抽象放在两个不同的类层次中，使两个层 次可以独立改变**。
+- 是一种结构型设计模式
+- Bridge模式基于类的**最小设计原则**，通过使用封装、聚合及继承等行为让不同 的类承担不同的职责。**它的主要特点是把抽象(Abstraction)与行为实现 (Implementation)分离开来，从而可以保持各部分的独立性以及应对他们的功能 扩展**
+
+
+
+![在这里插入图片描述](README.assets/20201118075050580.png)	
+
+
+
+- Client类：桥接模式的调用者
+
+- 抽象类(Abstraction) :维护了 Implementor / 即它的实现类ConcreteImplementorA.., 二者是聚合关系, Abstraction 充当桥接类
+
+-  RefinedAbstraction：是 Abstraction抽象类的子类
+
+-  Implementor：行为实现类的接口
+
+- ConcretelmplementorA/B: 行为的具体实现类
+
+- 从UML图：这里的抽象类和接口是聚合的关系，其实调用和被调用关系
+
+  
+
+**案例分析：**
+
+- 桥接模式解决手机操作问题
+
+  ![在这里插入图片描述](README.assets/20201118075909213.png)	
+  - 这里的Phone就相当于是一个桥接类
+
+  ```java
+  //抽象手机接口
+  public interface Phone {
+      void start();
+      void call();
+      void shutdown();
+  }
+  
+  //具体手机实现类,小米手机
+  public class XiaoMi  implements Phone{
+      @Override
+      public void start() {
+          System.out.println("小米手机开机");
+      }
+      
+      @Override
+      public void call() {
+          System.out.println("小米手机打电话");
+      }
+      
+      @Override
+      public void shutdown() {
+          System.out.println("小米手机关机");
+      }
+  }
+  
+  //桥接抽象类。 
+  public abstract class Style {
+      
+      //它聚合了抽象手机这个接口
+      private final Phone phone;
+      
+      public Style(Phone phone) {
+          this.phone = phone;
+      }
+         
+      protected void start(){
+          this.phone.start();
+      }
+      protected void call(){
+          this.phone.call();
+      }
+      protected void shutdown(){
+          this.phone.shutdown();
+      }
+  }
+  
+  
+  //手机具体样式实现类
+  public class FoldedPhone  extends  Style{
+      
+      public FoldedPhone(Phone phone) {
+          super(phone);
+      }
+      
+      @Override
+      public void start() {
+          super.start();
+          System.out.println("折叠样式手机");
+      }
+      
+      @Override
+      public void call() {
+          super.call();
+          System.out.println("折叠样式手机");
+      }
+      
+      @Override
+      public void shutdown() {
+          super.shutdown();
+          System.out.println("折叠样式手机");
+      }
+  }
+  
+  
+  public class Client {
+      @Test
+      public void testClient(){
+          
+          Style foldedPhone = new FoldedPhone(new XiaoMi());
+          
+          foldedPhone.start();
+          foldedPhone.call();
+          foldedPhone.shutdown();
+      }
+  }
+  
+  
+  ```
+
+  
+
+**桥接模式的注意事项和细节:**
+
+-  **实现了抽象和实现部分的分离**，从而极大的提供了系统的灵活性，让抽象部分和实 现部分独立开来
+-  **桥接模式替代多层继承方案**，**可以减少子类的个数**，降低系统的管理和维护成本。
+- 对于那些**不希望使用继承或因为多层次继承导致系统类的个数急剧增加的系统**，桥接模式尤为适用.
+
+
+
