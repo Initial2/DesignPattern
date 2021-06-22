@@ -1384,7 +1384,7 @@ class SchoolManager {
 - 创建型模式： 
   - 单例模式、抽象工厂模式、原型模式、建造者模式、工厂模式。
 - 结构型模式：
-  - 适配器模式、桥接模式、装饰模式、组合模式、外观模式、享 元模式、代理模式。
+  - 适配器模式、桥接模式、装饰模式、组合模式、外观模式、享元模式、代理模式。
 - 行为型模式：
   - 模版方法模式、命令模式、访问者模式、迭代器模式、观察者 模式、中介者模式、备忘录模式、解释器模式（Interpreter模式）、状态模式、策略模式、职责链模式(责任链模式)。
 
@@ -2581,17 +2581,244 @@ public void testClient(){
 
 ​    
 
-​    
+    ## 适配器模式（Adapter Pattern）
+
+**基本介绍：**
+
+- 适配器模式(Adapter Pattern)将某个类的接口转换成客户端期望的另一个接口表示，主的目的是兼容性，让原本因接口不匹配不能一起工作的两个类可以协同 工作。其别名为包装器(Wrapper)
+- 适配器模式属于**结构型模式**
+- 要分为三类：类适配器模式、对象适配器模式、接口适配器模式
+
+**工作原理：**
+
+-  将一个类的接口转换成另一种接口.让原本接口不兼容的类可以兼 容 
+- 从用户的角度看不到被适配者，是解耦的 
+- 用户调用适配器转化出来的目标接口方法，适配器再调用被适配者的相关接口 方法
+-  用户收到反馈结果，感觉只是和目标接口交互，如图
 
 ​    
 
+  ![在这里插入图片描述](README.assets/2020111715410129.png)	
+
+  
+
+### 类适配器
+
+**基本介绍：**
+
+- Adapter类，通过继承 src类，实现 dst 类接口，完成src->dst的适配
+
+  ![在这里插入图片描述](README.assets/20201117202826928.png)	
+
   
 
   
 
+**应用举例：**
 
+- 以生活中充电器的例子来讲解适配器，充电器本身相当于Adapter，220V交流电 相当于src (即被适配者)，我们的目dst(即 目标)是5V直流电
+
+
+
+**代码：**
+
+```java
+//被适配类
+public class Voltage220V {
+    public int outPut220V(){
+        int src = 220;
+        System.out.println("当前电压为:"+src+"伏");
+        return src;
+    }
+    
+}
+
+//适配接口
+public interface IVoltage5V {
+    int outPut5V();
+}
+
+
+
+//适配器类
+public class VoltageAdapter  extends Voltage220V implements IVoltage5V{
+    @Override
+    public int outPut5V() {
+        //转换电压操作
+        int dest = outPut220V() / 44;
+        System.out.println("当前电压为:"+dest+"伏");
+        return dest;
+    }
+}
+
+
+
+public class Phone {
+    public void charge(IVoltage5V iVoltage5V){
+        if (iVoltage5V.outPut5V() == 5){
+            System.out.println("当前电压为5V，可以充电");
+        }
+    }
+}
+
+
+//客户端测试
+public class Cilent {
+    @Test
+    public void test(){
+        Phone phone = new Phone(); 
+        phone.charge(new VoltageAdapter());
+    }
+}
+
+
+```
+
+ **类适配器模式注意事项和细节**:
+
+- Java是单继承机制，所以类适配器需要继承src类这一点算是一个缺点, 因为这要 求dst必须是接口，有一定局限性;
+- src类的方法在Adapter中都会暴露出来，也增加了使用的成本。
+-  由于其继承了src类，所以它可以根据需求重写src类的方法，使得Adapter的灵 活性增强了。 (会违背里氏替换原则)
+
+### 对象适配器
+
+- 基本思路和类的适配器模式相同，只是将Adapter类作修改**，不是继承src类，而是持有src类的实例，以解决兼容性的问题**。 
+
+- 即：持有 src类，实现 dst 类接口，完成src->dst的适配 2) 
+
+- 根据“合成复用原则”，在系统中尽量使用关联关系来替代继承关系。
+
+- **对象适配器模式是适配器模式常用的一种**
+
+  ![在这里插入图片描述](README.assets/20201117205425296.png)
+
+**代码演示：**
+
+- 对类适配器进行改进
+
+  ```java
+  
+  public class VoltageAdapter  implements IVoltage5V {
+      //不再是继承，而是聚合
+      private Voltage220V voltage220V;
+      
+      
+      public void setVoltage220V(Voltage220V voltage220V) {
+          this.voltage220V = voltage220V;
+      }
+      
+      @Override
+      public int outPut5V() {
+          //转换电压操作
+          int dest = voltage220V.outPut220V() / 44;
+          System.out.println("当前电压为:"+dest+"伏");
+          return dest;
+      }
+  }
+  
+  
+  public class Cilent {
+      @Test
+      public void test(){
+          Phone phone = new Phone();
+          VoltageAdapter voltageAdapter = new VoltageAdapter();
+          //设置被适配对象
+          voltageAdapter.setVoltage220V(new Voltage220V());
+          phone.charge(voltageAdapter);
+      }
+  }
+  
+  
+  ```
 
   
 
-  
+  **对象适配器模式注意事项和细节**
+
+  - 对象适配器和类适配器其实算是同一种思想，只不过实现方式不同。
+  -  根据合成复用原则，使用组合替代继承， 所以**它解决了类适配器必须继承src的 局限性问题，也不再要求dst必须是接口**。
+
+
+
+
+
+### 接口适配器
+
+**基本介绍：**
+
+- 一些书籍称为：**适配器模式(Default Adapter Pattern)或缺省适配器模式。** 
+- 当不需要全部实现接口提供的方法时，可先设计一个抽象类实现接口，并为该接 口中每个方法提供一个默认实现（空方法），那么该抽象类的子类可有选择地覆 盖父类的某些方法来实现需求
+- 适用于一个接口不想使用其所有的方法的情况。
+
+
+
+**代码举例：**
+
+```java
+public interface MyInterface {
+    void methods1();
+    void methods2();
+    void methods3();
+    void methods4();
+    void methods5();
+}
+
+public class AbsAdapter implements MyInterface{
+    @Override
+    public void methods1() {
+    
+    }
+    
+    @Override
+    public void methods2() {
+    
+    }
+    
+    @Override
+    public void methods3() {
+    
+    }
+    
+    @Override
+    public void methods4() {
+    
+    }
+    
+    @Override
+    public void methods5() {
+    
+    }
+}
+
+
+public class Client {
+    @Test
+    public void testClient(){
+        //用哪个只需重写哪个方法即可。 
+        new AbsAdapter(){
+            @Override
+            public void methods1() {
+                System.out.println("重写方法1");
+            }
+        };
+        
+    }
+}
+
+```
+
+
+
+
+
+
+
+###  适配器模式的注意事项和细节
+
+-  三种命名方式，是根据 src是以怎样的形式给到Adapter（在Adapter里的形式）来命名的。
+- 类适配器：以类给到，在Adapter里，就是将src当做类，继承
+- 对象适配器：以对象给到，在Adapter里，将src作为一个对象，持有
+- 接口适配器：以接口给到，在Adapter里，将src作为一个接口，实现
+- Adapter模式最大的作用还是将原本不兼容的接口融合在一起工作。
+-  实际开发中，实现起来不拘泥于我们讲解的三种经典形式
 
