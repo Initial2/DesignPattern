@@ -2961,3 +2961,287 @@ public class Client {
 
 
 
+
+
+
+
+## 装饰者模式(Decorator)
+
+**基本介绍：**
+
+- **动态的将新功能附加到对象上**。在对象功能扩展方面，**它比继承更 有弹性，装饰者模式也体现了开闭原则(ocp)**
+
+-  装饰者模式就像打包一个快递
+
+  - 主体(Component)：比如：Drink(饮料)       **// 被装饰者**
+  - 包装(Decorator)：比如：Decorator    **//装饰类**
+  - ConcreteComponent和Decorator。  
+    -  ConcreteComponent：具体的主体，比如各个单品咖啡。  
+    -  Decorator: 装饰者，比如各调料. Milk, Soy, Chocolate 
+  -  在如图的Component与ConcreteComponent之间，如果ConcreteComponent类很多,还可以设计一个缓冲层，将共有的部分提取出来，
+    抽象层一个类。Coffee就是一个缓冲层
+
+  ![在这里插入图片描述](README.assets/2020112317110326.png)
+
+
+
+
+
+**案例分析：**
+
+- 装饰者模式下的订单：2份巧克力+一份牛奶的LongBlack
+
+- ![在这里插入图片描述](README.assets/20201123173802764.png)
+
+
+
+**源码分析：**
+
+- ```java
+  装饰者模式咖啡订单项目应用实例
+  package com.yxj.decorator;
+  
+  public abstract class Drink {
+  
+  	public String des; // 描述
+  	private float price = 0.0f;
+  	public String getDes() {
+  		return des;
+  	}
+  	public void setDes(String des) {
+  		this.des = des;
+  	}
+  	public float getPrice() {
+  		return price;
+  	}
+  	public void setPrice(float price) {
+  		this.price = price;
+  	}
+  	
+  	//计算费用的抽象方法
+  	//子类来实现
+  	public abstract float cost();
+  	
+  }
+  
+  
+  package com.yxj.decorator;
+  
+  public class Coffee  extends Drink {
+  
+  	@Override
+  	public float cost() {
+  		// TODO Auto-generated method stub
+  		return super.getPrice();
+  	}
+  
+  	
+  }
+  
+  
+  package com.yxj.decorator;
+  
+  public class Espresso extends Coffee {
+  	
+  	public Espresso() {
+  		setDes(" 意大利咖啡 ");
+  		setPrice(6.0f);
+  	}
+  }
+  
+  
+  package com.yxj.decorator;
+  
+  public class LongBlack extends Coffee {
+  
+  	public LongBlack() {
+  		setDes(" longblack ");
+  		setPrice(5.0f);
+  	}
+  }
+  
+  
+  package com.yxj.decorator;
+  
+  public class ShortBlack extends Coffee{
+  	
+  	public ShortBlack() {
+  		setDes(" shortblack ");
+  		setPrice(4.0f);
+  	}
+  }
+  
+  
+  package com.yxj.decorator;
+  
+  public class Decorator extends Drink {
+  	private Drink obj;
+  	
+  	public Decorator(Drink obj) { //组合
+  		// TODO Auto-generated constructor stub
+  		this.obj = obj;
+  	}
+  	
+  	@Override
+  	public float cost() {
+  		// TODO Auto-generated method stub
+  		// getPrice 自己价格
+  		return super.getPrice() + obj.cost();
+  	}
+  	
+  	@Override
+  	public String getDes() {
+  		// TODO Auto-generated method stub
+  		// obj.getDes() 输出被装饰者的信息
+  		return des + " " + getPrice() + " && " + obj.getDes();
+  	}
+  	
+  	
+  
+  }
+  
+  
+  package com.yxj.decorator;
+  
+  //具体的Decorator， 这里就是调味品
+  public class Chocolate extends Decorator {
+  
+  	public Chocolate(Drink obj) {
+  		super(obj);
+  		setDes(" 巧克力 ");
+  		setPrice(3.0f); // 调味品 的价格
+  	}
+  
+  }
+  
+  
+  
+  package com.yxj.decorator;
+  
+  public class Milk extends Decorator {
+  
+  	public Milk(Drink obj) {
+  		super(obj);
+  		// TODO Auto-generated constructor stub
+  		setDes(" 牛奶 ");
+  		setPrice(2.0f); 
+  	}
+  
+  }
+  
+  
+  package com.yxj.decorator;
+  
+  public class Soy extends Decorator{
+  
+  	public Soy(Drink obj) {
+  		super(obj);
+  		// TODO Auto-generated constructor stub
+  		setDes(" 豆浆  ");
+  		setPrice(1.5f);
+  	}
+  
+  }
+  
+  
+  package com.yxj.decorator;
+  
+  public class DeCaf extends Coffee {
+  
+  	public DeCaf() {
+  		setDes(" 无因咖啡 ");
+  		setPrice(1.0f);
+  	}
+  }
+  
+  
+  
+  package com.yxj.decorator;
+  
+  public class CoffeeBar {
+  
+  	public static void main(String[] args) {
+  		// TODO Auto-generated method stub
+  		// 装饰者模式下的订单：2份巧克力+一份牛奶的LongBlack
+  
+  		// 1. 点一份 LongBlack
+  		Drink order = new LongBlack();
+  		System.out.println("费用1=" + order.cost());
+  		System.out.println("描述=" + order.getDes());
+  
+  		// 2. order 加入一份牛奶
+  		order = new Milk(order);
+  
+  		System.out.println("order 加入一份牛奶 费用 =" + order.cost());
+  		System.out.println("order 加入一份牛奶 描述 = " + order.getDes());
+  
+  		// 3. order 加入一份巧克力
+  
+  		order = new Chocolate(order);
+  
+  		System.out.println("order 加入一份牛奶 加入一份巧克力  费用 =" + order.cost());
+  		System.out.println("order 加入一份牛奶 加入一份巧克力 描述 = " + order.getDes());
+  
+  		// 3. order 加入一份巧克力
+  
+  		order = new Chocolate(order);
+  
+  		System.out.println("order 加入一份牛奶 加入2份巧克力   费用 =" + order.cost());
+  		System.out.println("order 加入一份牛奶 加入2份巧克力 描述 = " + order.getDes());
+  	
+  		System.out.println("===========================");
+  		
+  		Drink order2 = new DeCaf();
+  		
+  		System.out.println("order2 无因咖啡  费用 =" + order2.cost());
+  		System.out.println("order2 无因咖啡 描述 = " + order2.getDes());
+  		
+  		order2 = new Milk(order2);
+  		
+  		System.out.println("order2 无因咖啡 加入一份牛奶  费用 =" + order2.cost());
+  		System.out.println("order2 无因咖啡 加入一份牛奶 描述 = " + order2.getDes());
+  
+  	
+  	}
+  
+  }
+  
+  ```
+
+
+
+
+
+
+
+**装饰者模式在JDK应用的源码分析:**
+
+- ![在这里插入图片描述](README.assets/20201123174054319.png)	
+
+
+  ​	
+
+  1. inputStream 是抽象类, 类似我们前面讲的 Drink
+     	
+  2. FileInputStream 是  InputStream 子类，类似我们前面的 DeCaf, LongBlack
+     	
+  3.  FilterInputStream  是  InputStream 子类：类似我们前面 的 Decorator 修饰者
+     	
+  4.  DataInputStream 是 FilterInputStream 子类，具体的修饰者，类似前面的 Milk, Soy 等
+     	
+  5. FilterInputStream 类 有  protected volatile InputStream in; 即含被装饰者
+     	
+  6.  分析得出在jdk 的io体系中，就是使用装饰者模式
+
+
+
+
+
+
+
+
+
+
+
+
+
